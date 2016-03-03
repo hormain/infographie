@@ -11,7 +11,7 @@ using namespace std;
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red   = TGAColor(255, 0,   0,   255);
-
+const double g_Pi = 3.14159265358979323846;
 
 
 
@@ -80,29 +80,17 @@ void produitScal(float x1,float y1, float z1, float lum1, float lum2, float lum3
   *lum=x1*lum1+y1*lum2+z1*lum3;
 } 
 
-void multMatriceQuatreQuatre(float m1_1,float m1_2,float m1_3, float m1_4,float m2_1,float m2_2,float m2_3, float m2_4,float m3_1,float m3_2,float m3_3, float m3_4,float m4_1,float m4_2,float m4_3, float m4_4,float n1_1,float n1_2,float n1_3, float n1_4,float n2_1,float n2_2,float n2_3, float n2_4,float n3_1,float n3_2,float n3_3, float n3_4,float n4_1,float n4_2,float n4_3, float n4_4,float *M1_1, float *M1_2,float *M1_3, float *M1_4,float *M2_1,float *M2_2,float *M2_3, float *M2_4,float *M3_1,float *M3_2,float *M3_3, float *M3_4,float *M4_1,float *M4_2,float *M4_3, float *M4_4){
-  *M1_1=m1_1*n1_1+m1_2*n2_1+m1_3*n3_1+m1_4*n4_1;
- *M1_2=m1_1*n1_2+m1_2*n2_2+m1_3*n3_2+m1_4*n4_2;
- *M1_3=m1_1*n1_3+m1_2*n2_3+m1_3*n3_3+m1_4*n4_3;
- *M1_4=m1_1*n1_4+m1_2*n2_4+m1_3*n3_4+m1_4*n4_4;
 
- *M2_1=m2_1*n1_1+m2_2*n2_1+m2_3*n3_1+m2_4*n4_1;
- *M2_2=m2_1*n1_2+m2_2*n2_2+m2_3*n3_2+m2_4*n4_2;
- *M2_3=m2_1*n1_3+m2_2*n2_3+m2_3*n3_3+m2_4*n4_3;
- *M2_4=m2_1*n1_4+m2_2*n2_4+m2_3*n3_4+m2_4*n4_4;
-
- *M3_1=m3_1*n1_1+m3_2*n2_1+m3_3*n3_1+m3_4*n4_1;
- *M3_2=m3_1*n1_2+m3_2*n2_2+m3_3*n3_2+m3_4*n4_2;
- *M3_3=m3_1*n1_3+m3_2*n2_3+m3_3*n3_3+m3_4*n4_3;
- *M3_4=m3_1*n1_4+m3_2*n2_4+m3_3*n3_4+m3_4*n4_4;
-
- *M4_1=m4_1*n1_1+m4_2*n2_1+m4_3*n3_1+m4_4*n4_1;
- *M4_2=m4_1*n1_2+m4_2*n2_2+m4_3*n3_2+m4_4*n4_2;
- *M4_3=m4_1*n1_3+m4_2*n2_3+m4_3*n3_3+m4_4*n4_3;
- *M4_4=m4_1*n1_4+m4_2*n2_4+m4_3*n3_4+m4_4*n4_4;
-
-}
-
+void multMatSimpl4(float* mat1, float* mat2, float* res){
+  for(int i =0;i<16;i++)res[i]=0;
+  for(int i=0;i<4;i++){
+    for(int j=0;j<4;j++){
+      for(int k=0;k<4;k++){
+	res[i*4+j]+=mat2[j+k*4]*mat1[i*4+k];
+      }
+    }
+  }
+} 
 void transformationFinal(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3,float m1_1,float m1_2,float m1_3, float m1_4,float m2_1,float m2_2,float m2_3, float m2_4,float m3_1,float m3_2,float m3_3, float m3_4,float m4_1,float m4_2,float m4_3, float m4_4,float *X1, float *Y1, float *Z1, float *X2, float *Y2, float *Z2, float *X3, float *Y3, float *Z3){
   //calcule de laa matrice centrale 3D
   float x_1, y_1,z_1, x_2, y_2, z_2, x_3, y_3, z_3;
@@ -131,24 +119,29 @@ void transformationFinal(float x1, float y1, float z1, float x2, float y2, float
   *Y3=y_3/rapport3;
   *Z3=z_3/rapport3;
 }
-void transformationVec(float *x1, float *y1, float *z1,float m1_1,float m1_2,float m1_3, float m1_4,float m2_1,float m2_2,float m2_3, float m2_4,float m3_1,float m3_2,float m3_3, float m3_4,float m4_1,float m4_2,float m4_3, float m4_4,float *X1, float *Y1, float *Z1){
+void transformationVec(float *x1, float *y1, float *z1,float *mat,float *X1, float *Y1, float *Z1){
   //calcule de la matrice centrale 3D
   float x_1,y_1,z_1;
-  float caj=1.f;//coordonne que l'on rapjoute a chaque vecteur pour avoir la 4D
+  float caj=1.f;//coordonne que l'on rajoute a chaque vecteur pour avoir la 4D
    cout << *x1 <<"/" << *y1 << endl;
   //cout << "transformation" << endl;
-  x_1=*x1*m1_1+*y1*m1_2+*z1*m1_3+caj*m1_4;
-  y_1=*x1*m2_1+*y1*m2_2+*z1*m2_3+caj*m2_4;
-  z_1=*x1*m3_1+*y1*m3_2+*z1*m3_3+caj*m3_4;
-  //cout << x_1 <<"/"<< y_1 <<"/"<< z_1 << endl;
+  /* for(int i=0;i<16;i++){
+     cout<<mat[i]<<endl;
+     }*/
+  x_1=*x1*mat[0]+*y1*mat[1]+*z1*mat[2]+caj*mat[3];
+  y_1=*x1*mat[4]+*y1*mat[5]+*z1*mat[6]+caj*mat[7];
+  z_1=*x1*mat[8]+*y1*mat[9]+*z1*mat[10]+caj*mat[11];
+  cout << x_1 <<"/"<< y_1 <<"/"<< z_1 << endl;
   //projection 4D -> 3D
   float rapport1, rapport2, rapport3;
   //cout << m4_1 << "/" << m4_2 << "/" << m4_3 << "/" << m4_4 << endl;
-  rapport1=*x1*m4_1+*y1*m4_2+*z1*m4_3+caj*m4_4;
-  //  cout << rapport1 << endl;
-  *X1=x_1/rapport1;
-  *Y1=y_1/rapport1;
-  *Z1=z_1/rapport1;
+  rapport1=*x1*mat[12]+*y1*mat[13]+*z1*mat[14]+caj*mat[15];
+    cout << rapport1 << endl;
+   if(rapport1!=0){
+    *X1=x_1/rapport1;
+    *Y1=y_1/rapport1;
+    *Z1=z_1/rapport1;
+    }
   // cout << *X1 << "/" << *Y1 <<"/" << *Z1 << endl;
 }
 void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, TGAImage &image, TGAImage &text,float vtx1,float vtx2,float vty1,float vty2,float vtz1,float vtz2,float* tabZ, float* transfo){
@@ -167,13 +160,9 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
   //cout << x2 << endl;
   //boxe 
   box(x1,y1,x2,y2,x3,y3,&xmin,&xmax,&ymin,&ymax);
-  //perspective
-  transformationVec(&x1,&y1,&z1,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&x_1,&y_1,&z_1);
- transformationVec(&x2,&y2,&z2,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&x_2,&y_2,&z_2);
- transformationVec(&x3,&y3,&z3,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&x_3,&y_3,&z_3);
-  //repere former de vers 1 vers 2 et 1 vers 3
-  coordonneVec(x_1,y_1,z_1,x_2,y_2,z_2,&undeuxX,&undeuxY,&undeuxZ);
-  coordonneVec(x_1,y_1,z_1,x_3,y_3,z_3,&untroisX,&untroisY,&untroisZ);
+  
+  coordonneVec(x1,y1,z1,x2,y2,z2,&undeuxX,&undeuxY,&undeuxZ);
+  coordonneVec(x1,y1,z1,x3,y3,z3,&untroisX,&untroisY,&untroisZ);
   produitVec(undeuxX,undeuxY,undeuxZ,untroisX,untroisY,untroisZ,&planX,&planY,&planZ);
   produitScal(planX,planY,planZ,lumX,lumY,lumZ,&lum);
   
@@ -182,7 +171,7 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
   for(int x=xmin;x<xmax;x++){
     for(int y=ymin;y<ymax;y++){
  float X=0,Y=0,Z=0;
-       cout << x << "/" << y << endl;
+ // cout << x << "/" << y << endl;
 
       coordonneVec2(x,y,x1,y1,&pointunX,&pointunY);
       //coodonne des vecteur des absices et ordonne des points du triangle
@@ -200,7 +189,7 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
       float textureZ2 = vtz2*Y;
       //  cout << z<< endl;
       float X_1,Y_1,Z_1;
-      cout << x << "/" << y << endl;
+      // cout << x << "/" << y << endl;
       
       if(X>=0 && Y>=0 && Z>=0){
 	if(tabZ[tailleX*y+x]<z){
@@ -263,7 +252,22 @@ void triangleSwip(int x1, int y1, int x2, int y2, int x3, int y3, TGAImage &imag
   }
 }
 
-
+void printmat44(float *m) {
+  for (int i=0; i<4; i++) {
+    for (int j=0; j<4; j++) {
+      std::cout << m[j+i*4] << "\t";
+    }
+    std::cout << std::endl;
+  }
+}
+void printVec(float* v){
+  for(int i=0;i<3;i++){
+    cout<< v[i] << endl;
+  }
+}
+double rad(double angle){
+  return angle*g_Pi/180;
+}
 int main(int argc, char** argv) {
   int reso= 1000;
   TGAImage image(reso,reso, TGAImage::RGB);
@@ -273,10 +277,39 @@ int main(int argc, char** argv) {
   texture.flip_vertically();
   int resow=texture.get_width();
   int resoh=texture.get_height();
-  float camera=10;
+  float cameraX=0;
+  float cameraY=0;
+  float cameraZ=10;
+  float regardCamX=0;
+  float regardCamY=0;
+  float regardCamZ=0;
   float transfo[16];
-  multMatriceQuatreQuatre(reso/2,0,0,reso/2,0,reso/2,0,reso/2,0,0,reso/2,reso/2,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,/*-1./camera*/0,1,&transfo[0],&transfo[1],&transfo[2],&transfo[3],&transfo[4],&transfo[5],&transfo[6],&transfo[7],&transfo[8],&transfo[9],&transfo[10],&transfo[11],&transfo[12],&transfo[13],&transfo[14],&transfo[15]);
-   /*multMatriceQuatreQuatre(reso/2,0,0,reso/2,0,reso/2,0,reso/2,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,&transfo[0],&transfo[1],&transfo[2],&transfo[3],&transfo[4],&transfo[5],&transfo[6],&transfo[7],&transfo[8],&transfo[9],&transfo[10],&transfo[11],&transfo[12],&transfo[13],&transfo[14],&transfo[15]);*/
+  float transfo2[16];
+  float transfo3[16];
+  double rot[16];
+  double alpha=45;
+  alpha=rad(alpha);
+  float res[16];
+  cout << "debut des matrice" << endl;
+  rot[0]=cos(alpha);rot[1]=0;rot[2]=-sin(alpha);rot[3]=0;rot[4]=0;rot[5]=1;rot[6]=0;rot[7]=0;rot[8]=sin(alpha);rot[9]=0;rot[10]=0;rot[11]=cos(alpha);rot[12]=0;rot[13]=0;rot[14]=0;rot[15]=1;
+  transfo[0]=reso/2;transfo[1]=0;transfo[2]=0;transfo[3]=reso/2;transfo[4]=0;transfo[5]=reso/2;transfo[6]=0;transfo[7]=reso/2;transfo[8]=0;transfo[9]=0;transfo[10]=reso/2;transfo[11]=reso/2;transfo[12]=0;transfo[13]=0;transfo[14]=0;transfo[15]=1;
+  transfo2[0]=1;transfo2[1]=0;transfo2[2]=0;transfo2[3]=0;transfo2[4]=0;transfo2[5]=1;transfo2[6]=0;transfo2[7]=0;transfo2[8]=0;transfo2[9]=0;transfo2[10]=1;transfo2[11]=0;transfo2[12]=0;transfo2[13]=0;transfo2[14]=-1/cameraZ;transfo2[15]=1;
+  //transfo3[0]=1;transfo3[1]=0;transfo3[2]=0;transfo3[3]=0;transfo3[4]=0;transfo3[5]=1;transfo3[6]=0;transfo3[7]=0;transfo3[8]=0;transfo3[9]=0;transfo3[10]=1;transfo[11]=0;transfo3[12]=0;transfo3[13]=0;transfo3[14]=0;transfo3[15]=1;
+ cout << "fin debut des matrice" << endl;
+/* multMatriceQuatreQuatre(reso/2,0,0,reso/2,0,reso/2,0,reso/2,0,0,reso/2,reso/2,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,-1/cameraZ,1,&transfo[0],&transfo[1],&transfo[2],&transfo[3],&transfo[4],&transfo[5],&transfo[6],&transfo[7],&transfo[8],&transfo[9],&transfo[10],&transfo[11],&transfo[12],&transfo[13],&transfo[14],&transfo[15]);
+ */
+
+ printmat44(transfo);
+ std::cout << std::endl;
+ printmat44(transfo2);
+ std::cout << std::endl;
+ multMatSimpl4(transfo,transfo2,res);
+ printmat44(res);
+ std::cout << std::endl;
+ //return 0;
+
+ cout << "fin mult matrice" << endl;
+  //   multMatriceQuatreQuatre(reso/2,0,0,reso/2,0,reso/2,0,reso/2,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,&transfo[0],&transfo[1],&transfo[2],&transfo[3],&transfo[4],&transfo[5],&transfo[6],&transfo[7],&transfo[8],&transfo[9],&transfo[10],&transfo[11],&transfo[12],&transfo[13],&transfo[14],&transfo[15]);
   if(fichier){
     printf("Lecture du fichier : \n");
     std::string ligne;
@@ -317,9 +350,9 @@ int main(int argc, char** argv) {
 	    fichier >> x1[j];
 	    fichier >> y1[j];
 	    fichier >> z1[j];	 
-	    cout << x1[j] << endl;
-	    cout << y1[j] << endl;
-	    cout << z1[j] << endl;
+	    //  cout << x1[j] << endl;
+	    //cout << y1[j] << endl;
+	    //cout << z1[j] << endl;
 	    //cout << j << endl;
 	    j++;
 	  }else{
@@ -414,25 +447,42 @@ int main(int argc, char** argv) {
 	  Z1=z1[x[i]-1];
 	  Z2=z1[y[i]-1];
 	  Z3=z1[z[i]-1];
-	  
-	  /*
-	  X1=x1[x[i]-1]*reso/2+reso/2;
-	  X2=x1[y[i]-1]*reso/2+reso/2;
-	  X3=x1[z[i]-1]*reso/2+reso/2;
-	  Y1=y1[x[i]-1]*reso/2+reso/2;
-	  Y2=y1[y[i]-1]*reso/2+reso/2;
-	  Y3=y1[z[i]-1]*reso/2+reso/2;
-	  Z1=z1[x[i]-1]*reso/2+reso/2;
-	  Z2=z1[y[i]-1]*reso/2+reso/2;
-	  Z3=z1[z[i]-1]*reso/2+reso/2;
-	  */
 	  float X_1=0,X_2=0,X_3=0,Y_1=0,Y_2=0,Y_3=0,Z_1=0,Z_2=0,Z_3=0;
+	  /*
+	  X_1=x1[x[i]-1]*reso/2+reso/2;
+	  X_2=x1[y[i]-1]*reso/2+reso/2;
+	  X_3=x1[z[i]-1]*reso/2+reso/2;
+	  Y_1=y1[x[i]-1]*reso/2+reso/2;
+	  Y_2=y1[y[i]-1]*reso/2+reso/2;
+	  Y_3=y1[z[i]-1]*reso/2+reso/2;
+	  Z_1=z1[x[i]-1]*reso/2+reso/2;
+	  Z_2=z1[y[i]-1]*reso/2+reso/2;
+	  Z_3=z1[z[i]-1]*reso/2+reso/2;
+	  */
+	 
 	  // transformationFinal(X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,reso/2,0,0,reso/2,0,reso/2,0,reso/2,0,0,reso/2,reso/2,0,0,0,1,&X1,&Y1,&Z1,&X2,&Y2,&Z2,&X3,&Y3,&Z3);
 
-	  /* transformationVec(X1,Y1,Z1,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&X_1,&Y_1,&Z_1);
-	  transformationVec(X2,Y2,Z2,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&X_2,&Y_2,&Z_2);
-	  transformationVec(X3,Y3,Z3,transfo[0],transfo[1],transfo[2],transfo[3],transfo[4],transfo[5],transfo[6],transfo[7],transfo[8],transfo[9],transfo[10],transfo[11],transfo[12],transfo[13],transfo[14],transfo[15],&X_3,&Y_3,&Z_3);*/
-	  //  cout << transfo[0] <<"/" <<  transfo[1] <<"/" <<  transfo[2] << "/" << transfo[3] << "/" << transfo[4] << "/" << transfo[5] << "/" << transfo[6] << "/" << transfo[7] << "/" << transfo[8] << "/" << transfo[9] << "/" << transfo[10] << "/" << transfo[11] << "/" << transfo[12] << "/" << transfo[13] << "/" << transfo[14] << "/" << transfo[15] << endl;
+	  transformationVec(&X1,&Y1,&Z1,res,&X_1,&Y_1,&Z_1);
+	  transformationVec(&X2,&Y2,&Z2,res,&X_2,&Y_2,&Z_2);
+	  transformationVec(&X3,&Y3,&Z3,res,&X_3,&Y_3,&Z_3);
+	  float tmp[9];
+	  tmp[0]=X_1;
+	  tmp[1]=Y_1;
+	  tmp[2]=Z_1;
+	  printVec(tmp);
+	  cout << endl;
+	  tmp[0]=X_2;
+	  tmp[1]=Y_2;
+	  tmp[2]=Z_2;
+	  printVec(tmp);
+	  cout << endl;
+	  tmp[0]=X_3;
+	  tmp[1]=Y_3;
+	  tmp[2]=Z_3;
+	  printVec(tmp);
+	  cout << endl;
+	  
+	  //   cout << res[0] <<"/" <<  res[1] <<"/" <<  res[2] << "/" << res[3] << "/" << res[4] << "/" << res[5] << "/" << res[6] << "/" << res[7] << "/" << res[8] << "/" << res[9] << "/" << res[10] << "/" << res[11] << "/" << res[12] << "/" << res[13] << "/" << res[14] << "/" << res[15] << endl;
 	   /*   cout << X1 <<"/"<< X1*reso/2+reso/2<<"/"<< X_1 << endl;
 	       /* cout << X2 <<"/"<< X2*reso/2+reso/2<<"/"<< X_2+reso/2 << endl;
 	    cout << X3 <<"/"<< X3*reso/2+reso/2<<"/"<< X_3+reso/2 << endl;
@@ -458,7 +508,7 @@ int main(int argc, char** argv) {
 	  //line(X3,Y3,X1,Y1,image,white);
 		
 	  //	triangleSwip(X1,Y1,X2,Y2,X3,Y3,image,TGAColor(rand()%255, rand()%255,   rand()%255,   255));
-	  triangleBarycentre(X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,image,texture,VXu,VXv,VYu,VYv,VZu,VZv,tabZ,transfo);
+	  triangleBarycentre(X_1,Y_1,Z_1,X_2,Y_2,Z_2,X_3,Y_3,Z_3,image,texture,VXu,VXv,VYu,VYv,VZu,VZv,tabZ,res);
 		  //triangleBarycentre(X_1,Y_1,Z_1,X_2,Y_2,Z_2,X_3,Y_3,Z_3,image,texture,VXu,VXv,VYu,VYv,VZu,VZv,tabZ);
 	  i++;
 	}else{
