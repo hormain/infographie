@@ -175,17 +175,20 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
   //float tabZ[tailleX*image.get_height()];
   float lum=0,lum2=0;
   float planX=0,planY=0,planZ=0;
-  float lumX=10,lumY=10,lumZ=10;
+  float lumX=1,lumY=5,lumZ=10;
   float z;
   float x_1,y_1,z_1,x_2,y_2,z_2,x_3,y_3,z_3;
   normalize(lumX,lumY,lumZ,&lumX,&lumY,&lumZ);
+  lumX=lumX*2-1;
+  lumY=lumY*2-1;
+  lumZ=lumZ*2-1;
   //boxe 
   box(x1,y1,x2,y2,x3,y3,&xmin,&xmax,&ymin,&ymax);
   
   coordonneVec(x1,y1,z1,x2,y2,z2,&undeuxX,&undeuxY,&undeuxZ);
   coordonneVec(x1,y1,z1,x3,y3,z3,&untroisX,&untroisY,&untroisZ);
    produitVec(undeuxX,undeuxY,undeuxZ,untroisX,untroisY,untroisZ,&planX,&planY,&planZ);
-  //produitScal(planX,planY,planZ,lumX,lumY,lumZ,&lum);
+   //produitScal(planX,planY,planZ,lumX,lumY,lumZ,&lum);
   
    //  lum=abs(lum);
   // cout << xmin << '/' << xmax << '/' << ymin << '/' << ymax <<'/'<< lum << endl;
@@ -232,23 +235,30 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
       n[0]=color2.r;
       n[1]=color2.g;
       n[2]=color2.b;
+    
       normalize(n[0],n[1],n[2],&n[0],&n[1],&n[2]);
+ 
+  n[0]=n[0]*2-1;
+  n[1]=n[1]*2-1;
+  n[2]=n[2]*2-1;
+  //cout << n[0] <<"/"<< n[1] <<"/"<< n[2] << endl;
       produitScal(lumX,lumY,lumZ,n[0],n[1],n[2],&lum2);
-      lum2=lum2*2-1;
+      //      lum2=abs(lum2);
+      
       //  cout << z<< endl;
       float X_1,Y_1,Z_1;
       // cout << x << "/" << y << endl;
       
       if(X>=0 && Y>=0 && Z>=0){
 	if(tabZ[tailleX*y+x]<z){
-	   TGAColor color=text.get((textureX1+textureY1+textureZ1),(textureX2+textureY2+textureZ2));
+	  TGAColor color=text.get((textureX1+textureY1+textureZ1),(textureX2+textureY2+textureZ2));
 	   
-	   //  TGAColor color=TGAColor(255,255,255,255);
-	  color.r=color.r*lum2;
+	  //   TGAColor color=TGAColor(255,255,255,255);
+	      color.r=max(color.r*lum2,0.f);
 	  
-	  color.g=color.g*lum2;
+	      color.g=max(color.g*lum2,0.f);
 	  
-	  color.b=color.b*lum2;
+	      color.b=max(color.b*lum2,0.f);
 	   
 	  image.set(x,y,color);
 	  tabZ[tailleX*y+x]=z;
