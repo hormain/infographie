@@ -173,9 +173,9 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
   float coordX=0,coordY=0,coordZ=0;
   int tailleX=image.get_width();
   //float tabZ[tailleX*image.get_height()];
-  float lum=0;
+  float lum=0,lum2=0;
   float planX=0,planY=0,planZ=0;
-  float lumX=10,lumY=5,lumZ=10;
+  float lumX=10,lumY=10,lumZ=10;
   float z;
   float x_1,y_1,z_1,x_2,y_2,z_2,x_3,y_3,z_3;
   normalize(lumX,lumY,lumZ,&lumX,&lumY,&lumZ);
@@ -184,10 +184,10 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
   
   coordonneVec(x1,y1,z1,x2,y2,z2,&undeuxX,&undeuxY,&undeuxZ);
   coordonneVec(x1,y1,z1,x3,y3,z3,&untroisX,&untroisY,&untroisZ);
-  produitVec(undeuxX,undeuxY,undeuxZ,untroisX,untroisY,untroisZ,&planX,&planY,&planZ);
-  produitScal(planX,planY,planZ,lumX,lumY,lumZ,&lum);
+   produitVec(undeuxX,undeuxY,undeuxZ,untroisX,untroisY,untroisZ,&planX,&planY,&planZ);
+  //produitScal(planX,planY,planZ,lumX,lumY,lumZ,&lum);
   
-  lum=abs(lum);
+   //  lum=abs(lum);
   // cout << xmin << '/' << xmax << '/' << ymin << '/' << ymax <<'/'<< lum << endl;
   for(int x=xmin;x<xmax;x++){
     for(int y=ymin;y<ymax;y++){
@@ -208,19 +208,33 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
       float textureY2 = vty2*Z;
       float textureZ1 = vtz1*Y;
       float textureZ2 = vtz2*Y;
+   float n[3];
+      // gouraud 
+   /*
       float vXn1=Xn1*X;
-      float vYn1=Yn1*X;
-      float vZn1=Zn1*X;
-      float vXn2=Xn2*Y;
-      float vYn2=Yn2*Y;
-      float vZn2=Zn2*Y;
-      float vXn3=Xn3*Z;
-      float vYn3=Yn3*Z;
-      float vZn3=Zn3*Z;
-      
-      normalize(vXn1,vYn1,vZn1,&vXn1,&vYn1,&vZn1);
-      normalize(vXn2,vYn2,vZn2,&vXn2,&vYn2,&vZn2);
-      normalize(vXn3,vYn3,vZn3,&vXn3,&vYn3,&vZn3);
+      float vYn1=Xn2*X;
+      float vZn1=Xn3*X;
+      float vXn2=Yn1*Z;
+      float vYn2=Yn2*Z;
+      float vZn2=Yn3*Z;
+      float vXn3=Zn1*Y;
+      float vYn3=Zn2*Y;
+      float vZn3=Zn3*Y;
+   
+      n[0]=vXn1+vXn2+vXn3;
+      n[1]=vYn1+vYn2+vYn3;
+      n[2]=vZn1+vZn2+vZn3;
+      normalize(n[0],n[1],n[2],&n[0],&n[1],&n[2]);
+      produitScal(lumX,lumY,lumZ,n[0],n[1],n[2],&lum2);
+   */
+      // normal mapping
+      TGAColor color2=normal.get((textureX1+textureY1+textureZ1),(textureX2+textureY2+textureZ2));
+      n[0]=color2.r;
+      n[1]=color2.g;
+      n[2]=color2.b;
+      normalize(n[0],n[1],n[2],&n[0],&n[1],&n[2]);
+      produitScal(lumX,lumY,lumZ,n[0],n[1],n[2],&lum2);
+      lum2=lum2*2-1;
       //  cout << z<< endl;
       float X_1,Y_1,Z_1;
       // cout << x << "/" << y << endl;
@@ -228,18 +242,15 @@ void triangleBarycentre(float x1, float y1, float z1, float x2, float y2, float 
       if(X>=0 && Y>=0 && Z>=0){
 	if(tabZ[tailleX*y+x]<z){
 	   TGAColor color=text.get((textureX1+textureY1+textureZ1),(textureX2+textureY2+textureZ2));
-	  //TGAColor color2=eclairage.get((textureX1+textureY1+textureZ1),(textureX2+textureY2+textureZ2));
-	   //TGAColor color=TGAColor(255,255,255,255);
-	   //  produitScal(vXn1,vXn2,vXn3,lumX,lumY,lumZ,&lum);
-	   color.r=color.r*lum;
-	   //produitScal(vYn1,vYn2,vYn3,lumX,lumY,lumZ,&lum);
-	   color.g=color.g*lum;
-	   //produitScal(vZn1,vZn2,vZn3,lumX,lumY,lumZ,&lum);
-	   color.b=color.b*lum;
 	   
-	   float tmpx=x;
-	   float tmpy=y;
-	  image.set(tmpx,tmpy,color);
+	   //  TGAColor color=TGAColor(255,255,255,255);
+	  color.r=color.r*lum2;
+	  
+	  color.g=color.g*lum2;
+	  
+	  color.b=color.b*lum2;
+	   
+	  image.set(x,y,color);
 	  tabZ[tailleX*y+x]=z;
 	}
       }
